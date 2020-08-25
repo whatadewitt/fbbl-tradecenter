@@ -1,5 +1,4 @@
 const LEAGUE_KEY = process.env.LEAGUE_KEY;
-console.log(`LK: ${LEAGUE_KEY}`);
 
 const redis = require("redis");
 const request = require("request");
