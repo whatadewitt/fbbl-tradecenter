@@ -25,7 +25,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
-      - uses: secrethub/actions/env-export@v0.1.0
       - name: Run the script
         env:
           LEAGUE_KEY: ${{ secrets.LEAGUE_ID }}
