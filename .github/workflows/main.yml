@@ -26,6 +26,7 @@ jobs:
         with:
           node-version: 12.x
       - name: Run the script
+        uses: secrethub/actions/env-export@v0.1.0
         env:
           LEAGUE_KEY: ${{ secrets.LEAGUE_ID }}
           YAPP_CLIENT_ID: ${{ secrets.YAPP_CLIENT_ID }}
