@@ -25,5 +25,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
-      - name: Run a multi-line script
-        run: npm start
+      - name: Run the script
+        run: |
+        npm install
+        npm start
