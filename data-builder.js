@@ -73,6 +73,7 @@ const buildRosters = async (refreshToken) => {
       Bucket: process.env.AWS_S3_BUCKET_NAME,
       Key: process.env.AWS_S3_BUCKET_KEY,
       Body: JSON.stringify(data),
+      ACL: "public-read",
     };
 
     s3.putObject(params, function (err, data) {
