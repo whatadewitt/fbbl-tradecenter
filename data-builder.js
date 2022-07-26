@@ -28,10 +28,12 @@ const buildRosters = async () => {
         (player) => "team" === player.transaction.destination_type
       )[0];
 
-      player_cache[player.player_key] = {
-        ...player_cache[player.player_key],
-        free_agent_cost: parseInt(faab_bid, 10),
-      };
+      if (!player_cache[player.player_key]) {
+        player_cache[player.player_key] = {
+          ...player_cache[player.player_key],
+          free_agent_cost: parseInt(faab_bid, 10),
+        };
+      }
     }
   });
   
