@@ -37,9 +37,9 @@ const buildRosters = async () => {
     }
   });
   
-  // 2022 changes
-  player_cache["412.p.11377"].draft_cost = 1; // luis p
-  player_cache["412.p.9557"].draft_cost = 23; // javier b
+  // 2023 changes
+  // player_cache["412.p.11377"].draft_cost = 1; // luis p
+  // player_cache["412.p.9557"].draft_cost = 23; // javier b
 
   const data = teams.map(({ team_key, name, roster }) => {
     const players = roster.map((p) => {
