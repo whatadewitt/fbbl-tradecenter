@@ -1,6 +1,15 @@
-const LEAGUE_KEY = process.env.LEAGUE_KEY;
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { SNSClient, PublishCommand } = require("@aws-sdk/client-sns");
 
-const request = require("request");
+const dotenv = require("dotenv");
+if (process.env.AWS) {
+  dotenv.config({ path: "/home/bitnami/fbblcalc/.env" });
+} else {
+  dotenv.config();
+}
+
+const LEAGUE_KEY = process.env.LEAGUE_KEY;
+const BOUNDS = { low: 130, high: 400 }; 
 
 const YahooFantasy = require("yahoo-fantasy");
 const yf = new YahooFantasy(
@@ -8,8 +17,7 @@ const yf = new YahooFantasy(
   process.env.YAPP_CLIENT_SECRET
 );
 
-const AWS = require("aws-sdk");
-const s3 = new AWS.S3();
+const s3Client = new S3Client({ region: process.env.AWS_REGION });
 
 const buildRosters = async () => {
   const { draft_results } = await yf.league.draft_results(LEAGUE_KEY);
@@ -36,7 +44,7 @@ const buildRosters = async () => {
       }
     }
   });
-  
+
   // 2023 changes
   // player_cache["412.p.11377"].draft_cost = 1; // luis p
   // player_cache["412.p.9557"].draft_cost = 23; // javier b
@@ -60,23 +68,38 @@ const buildRosters = async () => {
     };
   });
 
+  // check to see if any teams are above/below the amounts
+  let invalidFlag = false;
+  data.forEach(t => {
+    const total = t.players.reduce((acc, curr) => acc + curr.cost, 0);
+    if (total < BOUNDS.low || total > BOUNDS.high) {
+      invalidFlag = true;
+    }
+  })
+
+  if (invalidFlag) {
+    const client = new SNSClient({ region: process.env.AWS_REGION });
+
+    const params = {
+      TopicArn: process.env.SNS_TOPIC_ARN,
+      Message: "An FBBL team is not within the salary cap / floor limits defined by the league.",
+    };
+    const command = new PublishCommand(params);
+    await client.send(command);
+  }
+
   const params = {
     Bucket: process.env.AWS_S3_BUCKET_NAME,
     Key: process.env.AWS_S3_BUCKET_KEY,
     Body: JSON.stringify(data),
     ACL: "public-read",
   };
-
-  s3.putObject(params, function (err, data) {
-    if (err) {
-      // TODO: email about IAM issues
-      console.error(err);
-    } else {
-      console.log("Successfully uploaded data");
-    }
-
-    process.exit(0);
-  });
+  try {
+    const response = await s3Client.send(new PutObjectCommand(params));
+    console.log("Successfully uploaded data");
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 buildRosters();
