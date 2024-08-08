@@ -9,7 +9,7 @@ if (process.env.AWS) {
 }
 
 const LEAGUE_KEY = process.env.LEAGUE_KEY;
-const BOUNDS = { low: 130, high: 400 }; 
+const BOUNDS = { low: 125, high: 400 }; 
 
 const YahooFantasy = require("yahoo-fantasy");
 const yf = new YahooFantasy(
